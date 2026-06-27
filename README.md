@@ -114,6 +114,26 @@ Create a new **Gree AC Local** hardware instance in Domoticz and configure:
 
 ---
 
+---
+
+## Acknowledgements
+
+This plugin is based on the excellent work of the following open-source projects:
+
+- **greeclimate**
+  https://github.com/cmroche/greeclimate
+
+The `greeclimate` library provides the local Gree communication protocol implementation used by this plugin.
+
+This Domoticz plugin integrates and extends that functionality with:
+
+- Native Domoticz Hardware integration
+- Device creation and synchronization
+- Local polling
+- Automatic status updates
+- Installation and update scripts
+- Domoticz-specific user interface and controls
+
 ## License
 
 MIT License
