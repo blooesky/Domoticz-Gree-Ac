@@ -7,6 +7,29 @@ No Cloud, No MQTT.
 
 The plugin communicates directly with the indoor unit using the local Gree protocol.
 
+## Features
+
+- Local LAN communication
+- No cloud dependency
+- One hardware instance per air conditioner
+- Power ON/OFF
+- Operation Mode
+- Target Temperature
+- Room Temperature
+- Fan Speed
+- Vertical Swing
+- Turbo Mode
+- Display Light
+- Raw Status (Debug)
+- Automatic reconnect
+- Virtual Environment installer
+
+ ## Requirements
+
+- Domoticz 2024+
+- Python 3.11+
+- Raspberry Pi / Linux
+
 ## Install
 
 ```bash
