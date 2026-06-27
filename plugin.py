@@ -1,7 +1,8 @@
 # Gree AC Domoticz Plugin
 
 """
-<plugin key="GreeAC" name="Gree AC Local" author="4D" version="1.0.0">
+<plugin key="GreeAC" name="Gree AC Local" author="4D" version="1.0.0" wikilink="https://github.com/blooesky/Domoticz-Gree-Ac"
+        externallink="https://github.com/blooesky/Domoticz-Gree-Ac">
     <params>
         <param field="Address" label="Gree AC IP" width="200px" required="true" default="192.168.0.200"/>
         <param field="Mode1" label="Gree AC MAC" width="200px" required="true" default="502c111111"/>
