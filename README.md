@@ -30,10 +30,24 @@ The plugin communicates directly with the indoor unit using the local Gree proto
 - Python 3.11+
 - Raspberry Pi / Linux
 
-## Install
+## Auto Install 
+cd /home/pi/domoticz/plugins
+git clone https://github.com/Everpro/Domoticz-Gree-Local-Plugin.git GreeAC
+cd GreeAC
+chmod +x install.sh update.sh uninstall.sh
+./install.sh
+sudo systemctl restart domoticz
+
+## Manual Install(Copy files)
 
 ```bash
 cd /home/pi/domoticz/plugins/GreeAC
 chmod +x install.sh update.sh uninstall.sh
 ./install.sh
+sudo systemctl restart domoticz
+
+## Update
+cd /home/pi/domoticz/plugins/GreeAC
+git pull
+./update.sh
 sudo systemctl restart domoticz
