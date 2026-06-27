@@ -39,7 +39,7 @@ The plugin communicates directly with the indoor unit using the local Gree proto
 
 ```bash
 cd /home/pi/domoticz/plugins
-git clone https://github.com/Everpro/Domoticz-Gree-Local-Plugin.git GreeAC
+git clone https://github.com/blooesky/Domoticz-Gree-Local-Plugin.git GreeAC
 
 cd GreeAC
 
