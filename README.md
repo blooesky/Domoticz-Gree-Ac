@@ -1,4 +1,4 @@
-cat > README.md <<'EOF'
+
 # Gree AC Local Plugin for Domoticz
 
 A local LAN plugin for controlling Gree air conditioners directly from Domoticz.
