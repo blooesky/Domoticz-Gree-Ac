@@ -60,7 +60,8 @@ if WORKER_MODE:
     import asyncio
     import logging
 
-    from greeclimate.discovery import Discovery, Listener
+    from greeclimate.discovery import Listener
+    from greeclimate.deviceinfo import DeviceInfo
     from greeclimate.device import Device, Props
 
     logging.basicConfig(
@@ -112,63 +113,11 @@ if WORKER_MODE:
             self.device = None
             self.device_info = None
 
+
         async def discover(self):
-            # Discovery is the only fragile part during Domoticz startup.
-            # Both Gree plugin instances normally start at almost the same
-            # moment, so a single short broadcast window can occasionally
-            # miss an otherwise healthy unit.
-            #
-            # Keep the event-based discovery because it returns immediately
-            # when the target replies, but allow several complete retries.
-
-            try:
-                mac_bytes = bytes.fromhex(self.mac)
-                initial_stagger = (sum(mac_bytes) % 7) * 0.10
-            except Exception:
-                initial_stagger = 0.0
-
-            if initial_stagger:
-                await asyncio.sleep(initial_stagger)
-
-            for attempt in range(1, WORKER_DISCOVERY_RETRIES + 1):
-                listener = WorkerDiscoveryListener(self.ip, self.mac)
-
-                # Do NOT pass a loop explicitly. This object is created while
-                # the worker's one asyncio loop is already running.
-                discovery = Discovery(timeout=WORKER_DISCOVERY_WAIT)
-                discovery.add_listener(listener)
-
-                try:
-                    await discovery.search_devices()
-
-                    try:
-                        await asyncio.wait_for(
-                            listener.found_event.wait(),
-                            timeout=WORKER_DISCOVERY_WAIT,
-                        )
-                    except asyncio.TimeoutError:
-                        pass
-
-                    if listener.found_device is not None:
-                        self.device_info = listener.found_device
-                        return self.device_info
-
-                finally:
-                    try:
-                        discovery.close()
-                    except Exception:
-                        pass
-
-                if attempt < WORKER_DISCOVERY_RETRIES:
-                    await asyncio.sleep(
-                        WORKER_DISCOVERY_RETRY_DELAY * attempt
-                    )
-
-            raise RuntimeError(
-                f"Gree device not found after "
-                f"{WORKER_DISCOVERY_RETRIES} discovery attempts: "
-                f"{self.ip} / {self.mac}"
-            )
+            # No broadcast-scan: direct unicast to the entered IP/MAC.
+            self.device_info = DeviceInfo(self.ip, 7000, self.mac, self.mac)
+            return self.device_info
 
         async def ensure_device(self):
             if self.device is not None:
@@ -357,6 +306,7 @@ UNIT_SWING = 6
 UNIT_LIGHT = 7
 UNIT_TURBO = 8
 UNIT_RAW = 9
+UNIT_QUIET = 10
 
 MODE_OPTIONS = {
     "LevelActions": "|||||",
@@ -648,6 +598,11 @@ class BasePlugin:
                 Name="Gree Light", Unit=UNIT_LIGHT, TypeName="Switch"
             ).Create()
 
+        if UNIT_QUIET not in Devices:
+            Domoticz.Device(
+                Name="Gree QUIET", Unit=UNIT_QUIET, TypeName="Switch"
+            ).Create()
+
         if UNIT_TURBO not in Devices:
             Domoticz.Device(
                 Name="Gree Turbo", Unit=UNIT_TURBO, TypeName="Switch"
@@ -857,6 +812,10 @@ class BasePlugin:
             commands.append(
                 (Props.TURBO.value, 1 if Command == "On" else 0)
             )
+        elif Unit == UNIT_QUIET:
+            commands.append(
+                (Props.QUIET.value, 1 if Command == "On" else 0)
+            )
 
         if not commands:
             return
@@ -893,6 +852,7 @@ class BasePlugin:
         self._consider_raw_state(raw, Props.SWING_VERT, set(range(0, 12)))
         self._consider_raw_state(raw, Props.LIGHT, {0, 1})
         self._consider_raw_state(raw, Props.TURBO, {0, 1})
+        self._consider_raw_state(raw, Props.QUIET, {0, 1})
 
         self.render_confirmed_state()
 
@@ -1037,6 +997,12 @@ class BasePlugin:
             self.update_switch(
                 UNIT_TURBO,
                 self.confirmed[Props.TURBO.value] == 1,
+            )
+
+        if Props.QUIET.value in self.confirmed:
+            self.update_switch(
+                UNIT_QUIET,
+                self.confirmed[Props.QUIET.value] == 1,
             )
 
     # -----------------------------------------------------------------
